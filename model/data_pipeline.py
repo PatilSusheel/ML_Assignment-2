@@ -59,7 +59,7 @@ def create_preprocessor():
             ("numerical", StandardScaler(), NUMERICAL_COLUMNS),
             (
                 "categorical",
-                OneHotEncoder(handle_unknown="ignore"),
+                OneHotEncoder(handle_unknown="ignore", sparse_output=False),
                 CATEGORICAL_COLUMNS,
             ),
         ]
