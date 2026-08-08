@@ -76,18 +76,6 @@ The interactive web application is built with Streamlit (`app.py`) and evaluates
 the saved models **live** on the test data every time a button is clicked — it
 does not display pre-computed metrics.
 
-### Features
-
-| Feature | What it does | Marks covered |
-| --- | --- | --- |
-| File uploader | Upload a test CSV (default `test_data.csv` is pre-loaded) | 1 mark |
-| Model dropdown | Select which model to evaluate | 1 mark |
-| Metrics table | Shows all 6 metrics (Accuracy, AUC, Precision, Recall, F1, MCC) computed live | 1 mark |
-| Confusion matrix | `seaborn.heatmap` rendered from the live predictions | 1 mark |
-| Classification report | Precision/recall/F1 per class shown as a table | — |
-| Evaluate button | Runs the selected model on the test data and shows its metrics | — |
-| Compare All button | Evaluates every model and shows a comparison table plus the best model per metric | Bonus |
-
 ### Running the application
 
 ```bash
