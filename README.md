@@ -52,24 +52,6 @@ https://github.com/PatilSusheel/ML_Assignment-2
 | Random Forest | Best overall: highest AUC (0.92), F1 (0.56), and MCC (0.53) with strong recall (0.86). |
 | Overall Winner | Random Forest gives the best overall performance on this dataset. |
 
-### Preprocessing & Feature Engineering
-
-To improve the evaluation metrics, the following techniques were applied:
-
-- **Feature engineering** — `pdays = -1` (client never previously contacted) was
-  split into a binary `contacted_before` flag, and `pdays` was set to `0`. This
-  removes a large negative outlier that skewed `StandardScaler`.
-- **Class balancing** — `class_weight="balanced"` (and
-  `"balanced_subsample"` for Random Forest) up-weights the minority "yes" class,
-  dramatically improving recall, F1, and MCC.
-- **Regularisation / tuning** — Logistic Regression `C=0.1`, Decision Tree
-  `max_depth=8` + `min_samples_leaf=20`, kNN `n_neighbors=15` +
-  `weights="distance"`, Random Forest `max_depth=12` + `min_samples_leaf=10`.
-
-The feature engineering is embedded **inside** the saved pipeline (via
-`FunctionTransformer`), so the Streamlit app applies the exact same
-transformation at inference time without any extra code.
-
 ## Streamlit Application
 
 The interactive web application is built with Streamlit (`app.py`) and evaluates
