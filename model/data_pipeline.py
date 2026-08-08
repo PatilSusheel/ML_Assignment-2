@@ -3,13 +3,16 @@ from pathlib import Path
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT_DIR / "data" / "bank" / "bank-full.csv"
 TEST_FILE = ROOT_DIR / "test_data.csv"
 
+# contacted_before is created by engineer_features() and added to the
+# numerical columns. It is NOT part of the raw input columns.
 NUMERICAL_COLUMNS = [
     "age",
     "balance",
@@ -18,6 +21,7 @@ NUMERICAL_COLUMNS = [
     "campaign",
     "pdays",
     "previous",
+    "contacted_before",  # new binary flag from feature engineering
 ]
 
 CATEGORICAL_COLUMNS = [
@@ -38,6 +42,20 @@ def load_data():
     return data
 
 
+def engineer_features(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    pdays = -1 means the client was NEVER previously contacted.
+    StandardScaler treats -1 as a large negative outlier, which skews
+    the entire column. We split it into two signals instead:
+      - contacted_before: 1 if pdays != -1, else 0
+      - pdays: replace -1 with 0 (harmless once contacted_before exists)
+    """
+    df = data.copy()
+    df["contacted_before"] = (df["pdays"] != -1).astype(int)
+    df["pdays"] = df["pdays"].replace(-1, 0)
+    return df
+
+
 def split_data(data):
     X = data.drop("y", axis=1)
     y = data["y"].map({"no": 0, "yes": 1})
@@ -47,14 +65,22 @@ def split_data(data):
         y,
         test_size=0.2,
         random_state=42,
-        stratify=y,
+        stratify=y,  # keeps class ratio in both splits
     )
 
     return X_train, X_test, y_train, y_test
 
 
 def create_preprocessor():
-    preprocessor = ColumnTransformer(
+    """
+    Build the full preprocessing pipeline.
+
+    Feature engineering is embedded INSIDE the pipeline (via FunctionTransformer)
+    so that the SAME transformation is applied during training and at inference
+    time in the Streamlit app. The app passes raw test data (no contacted_before
+    column) and the pipeline creates it automatically.
+    """
+    column_transformer = ColumnTransformer(
         transformers=[
             ("numerical", StandardScaler(), NUMERICAL_COLUMNS),
             (
@@ -62,6 +88,13 @@ def create_preprocessor():
                 OneHotEncoder(handle_unknown="ignore", sparse_output=False),
                 CATEGORICAL_COLUMNS,
             ),
+        ]
+    )
+
+    preprocessor = Pipeline(
+        steps=[
+            ("engineer", FunctionTransformer(engineer_features, validate=False)),
+            ("columns", column_transformer),
         ]
     )
     return preprocessor
@@ -80,3 +113,7 @@ if __name__ == "__main__":
 
     print("Training rows:", len(X_train))
     print("Test rows:", len(X_test))
+    print(
+        "Class balance (test):",
+        y_test.value_counts(normalize=True).round(3).to_dict(),
+    )

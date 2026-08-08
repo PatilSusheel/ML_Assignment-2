@@ -22,12 +22,38 @@ from data_pipeline import create_preprocessor, load_data, split_data
 
 MODEL_DIR = Path(__file__).resolve().parent
 
+# class_weight="balanced" makes the model internally up-weight the minority
+# class ("yes") so it stops just predicting "no" for everything.
+# KNN and GaussianNB don't support class_weight — they're naturally
+# affected less by imbalance since KNN uses distances and NB uses priors.
 MODELS = {
-    "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
-    "Decision Tree": DecisionTreeClassifier(random_state=42),
-    "kNN": KNeighborsClassifier(n_neighbors=5),
-    "Naive Bayes": GaussianNB(),
-    "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+    "Logistic Regression": LogisticRegression(
+        max_iter=1000,
+        random_state=42,
+        class_weight="balanced",  # key fix
+        C=0.1,  # slight regularisation helps on this dataset
+    ),
+    "Decision Tree": DecisionTreeClassifier(
+        random_state=42,
+        class_weight="balanced",  # key fix
+        max_depth=8,  # unconstrained trees overfit badly here
+        min_samples_leaf=20,
+    ),
+    "kNN": KNeighborsClassifier(
+        n_neighbors=15,  # 5 was too small; 15 gives smoother boundaries
+        weights="distance",  # nearer neighbours get more vote
+        metric="euclidean",
+    ),
+    "Naive Bayes": GaussianNB(
+        var_smoothing=1e-8,  # default is fine; explicit for clarity
+    ),
+    "Random Forest": RandomForestClassifier(
+        n_estimators=100,
+        random_state=42,
+        class_weight="balanced_subsample",  # rebalances per tree, more robust
+        max_depth=12,
+        min_samples_leaf=10,
+    ),
 }
 
 MODEL_FILES = {
@@ -56,7 +82,7 @@ def train_and_evaluate_models():
     results = []
 
     for model_name, classifier in MODELS.items():
-        print("Training", model_name)
+        print(f"Training {model_name}...")
 
         pipeline = Pipeline(
             steps=[
@@ -76,8 +102,12 @@ def train_and_evaluate_models():
         with open(model_path, "wb") as model_file:
             pickle.dump(pipeline, model_file)
 
+        print(
+            f"  F1={metrics['F1']:.4f}  AUC={metrics['AUC']:.4f}  "
+            f"MCC={metrics['MCC']:.4f}"
+        )
+
     results_df = pd.DataFrame(results)
-    results_df.to_csv(MODEL_DIR / "model_metrics.csv", index=False)
     return results_df
 
 
