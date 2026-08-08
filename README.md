@@ -82,22 +82,6 @@ does not display pre-computed metrics.
 streamlit run app.py
 ```
 
-### Repository structure
-
-```
-model/
-  ├── logistic_regression.pkl
-  ├── decision_tree.pkl
-  ├── knn.pkl
-  ├── naive_bayes.pkl
-  ├── random_forest.pkl
-  ├── data_pipeline.py
-  └── train_models.py
-app.py
-test_data.csv
-data/bank/bank-full.csv
-```
-
 Each saved model is a complete `sklearn` pipeline that bundles the feature
 engineering (`FunctionTransformer`), the preprocessor (scaler/encoder), and the
 classifier, so the Streamlit app can evaluate any uploaded test CSV without
