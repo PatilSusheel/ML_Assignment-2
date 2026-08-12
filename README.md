@@ -45,11 +45,11 @@ https://github.com/PatilSusheel/ML_Assignment-2
 
 | ML Model Name | Observation about model performance |
 | --- | --- |
-| Logistic Regression | With SMOTE oversampling, recall stays high (0.81) and F1 reaches 0.55, giving the best F1/MCC among linear models. |
-| Decision Tree | SMOTE lifts recall to 0.78 while depth/leaf constraints keep the tree from overfitting. |
-| kNN | SMOTE dramatically improves kNN — recall jumps from 0.32 to 0.81 and F1 from 0.43 to 0.53, fixing its previous weakness. |
-| Naive Bayes | Moderate recall (0.67) but the lowest AUC, precision, and MCC of all models. |
-| Random Forest | Best overall: highest accuracy (0.87), AUC (0.92), F1 (0.58), and MCC (0.53) with strong recall (0.78). |
+| Logistic Regression | Captures 80.6% of actual subscribers (recall) while keeping precision at 0.42, meaning it flags many non-subscribers as false positives. Its high AUC (0.91) shows it ranks subscribers well, and it achieves the best F1 (0.55) and MCC (0.51) among the linear models. |
+| Decision Tree | Correctly identifies 78.4% of subscribers (recall) with a precision of 0.41. Its AUC (0.89) is the lowest among the tree-based models, indicating weaker probability ranking, but depth and leaf constraints keep it from overfitting. |
+| kNN | Reaches the highest recall of the distance-based models at 0.81, catching most subscribers, but its precision (0.39) is the second lowest — it over-predicts the "yes" class. Its AUC (0.89) trails the linear and ensemble models. |
+| Naive Bayes | Has the weakest overall ranking ability with the lowest AUC (0.79). It recalls 66.5% of subscribers but at the cost of the lowest precision (0.31), producing the most false positives and the lowest MCC (0.35) of all models. |
+| Random Forest | Leads every metric: highest accuracy (0.87), AUC (0.92), precision (0.46), F1 (0.58), and MCC (0.53). It recalls 77.9% of subscribers while maintaining the best precision, giving the most reliable overall predictions. |
 | Overall Winner | Random Forest gives the best overall performance on this dataset. |
 
 ## Streamlit Application
