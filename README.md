@@ -35,28 +35,30 @@ https://github.com/PatilSusheel/ML_Assignment-2
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 | --- | --- | --- | --- | --- | --- | --- |
-| Logistic Regression | 0.8447 | 0.9079 | 0.4166 | 0.8166 | 0.5517 | 0.5085 |
-| Decision Tree | 0.8071 | 0.8955 | 0.3641 | 0.8686 | 0.5131 | 0.4784 |
-| kNN | 0.9015 | 0.8840 | 0.6640 | 0.3195 | 0.4314 | 0.4157 |
-| Naive Bayes | 0.8465 | 0.8069 | 0.3849 | 0.5217 | 0.4430 | 0.3619 |
-| Random Forest | 0.8439 | 0.9228 | 0.4188 | 0.8629 | 0.5639 | 0.5292 |
+| Logistic Regression | 0.8467 | 0.9067 | 0.4194 | 0.8062 | 0.5517 | 0.5068 |
+| Decision Tree | 0.8400 | 0.8872 | 0.4050 | 0.7836 | 0.5340 | 0.4847 |
+| kNN | 0.8307 | 0.8864 | 0.3918 | 0.8091 | 0.5279 | 0.4825 |
+| Naive Bayes | 0.7877 | 0.7900 | 0.3101 | 0.6654 | 0.4231 | 0.3479 |
+| Random Forest | 0.8673 | 0.9192 | 0.4603 | 0.7788 | 0.5787 | 0.5307 |
 
 ### Model Observations
 
 | ML Model Name | Observation about model performance |
 | --- | --- |
-| Logistic Regression | With `class_weight="balanced"` and feature engineering, recall jumps to 0.82 and F1 to 0.55, giving the best F1/MCC among linear models. |
-| Decision Tree | Balanced class weights and depth/leaf constraints lift recall to 0.87 while keeping the tree from overfitting. |
-| kNN | Highest accuracy (0.90) and precision (0.66), but the lowest recall — it still struggles to catch subscribers. |
-| Naive Bayes | Moderate recall (0.52) but the lowest AUC, precision, and MCC of all models. |
-| Random Forest | Best overall: highest AUC (0.92), F1 (0.56), and MCC (0.53) with strong recall (0.86). |
+| Logistic Regression | With SMOTE oversampling, recall stays high (0.81) and F1 reaches 0.55, giving the best F1/MCC among linear models. |
+| Decision Tree | SMOTE lifts recall to 0.78 while depth/leaf constraints keep the tree from overfitting. |
+| kNN | SMOTE dramatically improves kNN — recall jumps from 0.32 to 0.81 and F1 from 0.43 to 0.53, fixing its previous weakness. |
+| Naive Bayes | Moderate recall (0.67) but the lowest AUC, precision, and MCC of all models. |
+| Random Forest | Best overall: highest accuracy (0.87), AUC (0.92), F1 (0.58), and MCC (0.53) with strong recall (0.78). |
 | Overall Winner | Random Forest gives the best overall performance on this dataset. |
 
 ## Streamlit Application
 
 The interactive web application is built with Streamlit (`app.py`) and evaluates
-the saved models **live** on the test data every time a button is clicked — it
-does not display pre-computed metrics.
+the saved models **live** on the test data. Selecting a model from the dropdown
+immediately evaluates it on the test data and shows its metrics, confusion
+matrix, and classification report. The **Compare All** button evaluates every
+model at once and displays a comparison table.
 
 ### Running the application
 

@@ -73,14 +73,15 @@ def split_data(data):
 
 def create_preprocessor():
     """
-    Build the full preprocessing pipeline.
+    Build the preprocessing transformer (scaling + one-hot encoding).
 
-    Feature engineering is embedded INSIDE the pipeline (via FunctionTransformer)
-    so that the SAME transformation is applied during training and at inference
-    time in the Streamlit app. The app passes raw test data (no contacted_before
-    column) and the pipeline creates it automatically.
+    Feature engineering (engineer_features) is applied as a separate step in
+    the training pipeline so that the SAME transformation is applied during
+    training and at inference time in the Streamlit app. The app passes raw
+    test data (no contacted_before column) and the pipeline creates it
+    automatically.
     """
-    column_transformer = ColumnTransformer(
+    return ColumnTransformer(
         transformers=[
             ("numerical", StandardScaler(), NUMERICAL_COLUMNS),
             (
@@ -90,14 +91,6 @@ def create_preprocessor():
             ),
         ]
     )
-
-    preprocessor = Pipeline(
-        steps=[
-            ("engineer", FunctionTransformer(engineer_features, validate=False)),
-            ("columns", column_transformer),
-        ]
-    )
-    return preprocessor
 
 
 def save_test_data(X_test, y_test):

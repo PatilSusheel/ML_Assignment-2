@@ -2,6 +2,8 @@ import pickle
 from pathlib import Path
 
 import pandas as pd
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -14,28 +16,31 @@ from sklearn.metrics import (
 )
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer
 from sklearn.tree import DecisionTreeClassifier
 
-from data_pipeline import create_preprocessor, load_data, split_data
+from data_pipeline import (
+    create_preprocessor,
+    engineer_features,
+    load_data,
+    split_data,
+)
 
 
 MODEL_DIR = Path(__file__).resolve().parent
 
-# class_weight="balanced" makes the model internally up-weight the minority
-# class ("yes") so it stops just predicting "no" for everything.
-# KNN and GaussianNB don't support class_weight — they're naturally
-# affected less by imbalance since KNN uses distances and NB uses priors.
+# The dataset is imbalanced (~88% "no", ~12% "yes"). SMOTE oversamples the
+# minority class during training so the models stop just predicting "no" for
+# everything. This lifts recall and F1 across all models, especially kNN and
+# the tree-based models, without needing per-model class_weight tweaks.
 MODELS = {
     "Logistic Regression": LogisticRegression(
         max_iter=1000,
         random_state=42,
-        class_weight="balanced",  # key fix
         C=0.1,  # slight regularisation helps on this dataset
     ),
     "Decision Tree": DecisionTreeClassifier(
         random_state=42,
-        class_weight="balanced",  # key fix
         max_depth=8,  # unconstrained trees overfit badly here
         min_samples_leaf=20,
     ),
@@ -50,7 +55,6 @@ MODELS = {
     "Random Forest": RandomForestClassifier(
         n_estimators=100,
         random_state=42,
-        class_weight="balanced_subsample",  # rebalances per tree, more robust
         max_depth=12,
         min_samples_leaf=10,
     ),
@@ -84,9 +88,11 @@ def train_and_evaluate_models():
     for model_name, classifier in MODELS.items():
         print(f"Training {model_name}...")
 
-        pipeline = Pipeline(
+        pipeline = ImbPipeline(
             steps=[
+                ("engineer", FunctionTransformer(engineer_features, validate=False)),
                 ("preprocessor", create_preprocessor()),
+                ("smote", SMOTE(random_state=42)),
                 ("classifier", classifier),
             ]
         )
